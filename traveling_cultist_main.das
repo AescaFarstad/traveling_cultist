@@ -56,7 +56,7 @@ def draw
         render_level(level)
         render_interaction(mouse, input_state, level)
         render_ui(buttons)
-        render_debug()
-        clear_debug()
+        //render_debug()
+        //clear_debug()
     else
         render_help()
