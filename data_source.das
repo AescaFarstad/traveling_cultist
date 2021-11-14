@@ -1,10 +1,12 @@
-require Level
+require model
 
-let
-    padding = float4(100, 100, 50, 100) //top, right, bottom, left
-    cityDensity = 0.0001
+let BAN_RECT = float4(0, 0, 220, 250)
 
-def init_level(var level:Level; width, height:float)
-    level.size = float3(width - padding.w - padding.y, 0.0, height - padding.x - padding.z)
-    level.center = float3(padding.w + level.size.x * 0.5, 0.0, padding.x + level.size.z * 0.5)
-    add_cities(level, int(level.size.x * level.size.z * cityDensity))
+let levels <-[[LevelSetting[6]
+                [[LevelSetting id=0, seed=int4(1, 2, 3, 9), knownLength=4194.0, density=0.00004, p_factor=9, minDst=50.0, timeLimit=50]];
+                [[LevelSetting id=1, seed=int4(1, 2, 3, 4), knownLength=5696.0, density=0.00008, p_factor=7, minDst=40.0, timeLimit=70]];
+                [[LevelSetting id=2, seed=int4(1, 2, 3, 4), knownLength=7316.0, density=0.00015, p_factor=3, minDst=30.0, timeLimit=150]];
+                [[LevelSetting id=3, seed=int4(),           knownLength=.0, density=0.00004, p_factor=5, minDst=50.0, timeLimit=50]];
+                [[LevelSetting id=4, seed=int4(),           knownLength=.0, density=0.00008, p_factor=7, minDst=40.0, timeLimit=70]];
+                [[LevelSetting id=5, seed=int4(),           knownLength=.0, density=0.00025, p_factor=4, minDst=25.0, timeLimit=200]]
+                ]]

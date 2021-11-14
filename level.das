@@ -1,24 +1,59 @@
 require math
 require daslib/random
 require debug_draw
+require math_2d
+require dasbox
+require solver_util
+require solver_combo
 require model public
 
 
-def add_cities(var level:Level; num: int; p_factor:int = 20)
+def reset_level(var level:Level)
+    var list := level.cities
+    level.playerSolution <- solution_from_list(convex_hull(list))
+    return
+
+def load_setting(var level:Level; setting:LevelSetting; ban_rect:float4)
+    clear(level.cities)
+    if setting.seed != int4()
+        level.seed = setting.seed
+    else
+        debug("asferfresd")
+        randomize_seed(level.seed)
+    level.startingSeed = level.seed
+    let numCities = int(level.size.x * level.size.z * setting.density)
+    add_cities(level, numCities, setting.minDst, setting.p_factor, ban_rect)
+    level.playerSolution <- solution_from_list(convex_hull(level.cities))
+    level.id = setting.id
+    if setting.knownLength > .0
+        level.knownLength = setting.knownLength
+    else
+        level.aiSolution := level.cities
+        combo_solve(level.aiSolution, level.seed, setting.timeLimit)
+        level.knownLength = quick_length(level.aiSolution)
+    return
+
+def add_cities(var level:Level; num: int; min_dst:float; p_factor:int; ban_rect:float4)
     var left = num
-    while left-- >= 0
+    let bufferSq = min_dst * min_dst
+    var itersLeft = 1000000
+    while left >= 0 && itersLeft-- > 0
         var bestLoc: float3
         var bestDstSq = -1.0
         for it in range(p_factor)
             let loc = level.center - level.size * 0.5 + float3( random_float(level.seed) * level.size.x, .0,
                                                                 random_float(level.seed) * level.size.z)
+            if loc.x > ban_rect.x && loc.z > ban_rect.y && loc.x < ban_rect.z && loc.z < ban_rect.w
+                continue
             var minDstSq = FLT_MAX
             for p in level.cities
                 minDstSq = min(minDstSq, distance_sq(p, loc))
-            if minDstSq > bestDstSq
+            if minDstSq > bestDstSq && minDstSq > bufferSq
                 bestDstSq = minDstSq
                 bestLoc = loc
-        level.cities |> push(bestLoc)
+        if bestDstSq > .0
+            level.cities |> push(bestLoc)
+            left--
 
 def solution_from_list(list:array<float3>): Solution
     if length(list) < 2

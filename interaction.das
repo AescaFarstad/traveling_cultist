@@ -16,12 +16,10 @@ def translate_input(var input:MouseInput)
     let mousePosR = get_mouse_position()
     input.pos = float3(mousePosR.x, .0, mousePosR.y)
 
-    //input.lmb_wasDown = true
-    //input.lmb_isDown = true
-    //input.pos = float3(500.0, 0.0, 600.0)
-
 def handle_input(mouse:MouseInput; var input_state:InputState; var level:Level)
-
+    input_state.interactedWithGame = false
+    if length(level.playerSolution.edges) == 0
+        return
     if !mouse.lmb_isDown && !mouse.lmb_wasDown
         input_state.edgeCandidate = -1
 
@@ -51,13 +49,13 @@ def handle_input(mouse:MouseInput; var input_state:InputState; var level:Level)
     if !mouse.lmb_wasDown && mouse.lmb_isDown && length(level.playerSolution.edges) > 3
         if input_state.hasDeleteCandidate
             solution_delete_point(level.playerSolution, input_state.deleteCandidate)
+            input_state.interactedWithGame = true
+
     if mouse.lmb_wasDown && input_state.edgeCandidate != -1 && input_state.edgeCandidate < length(level.playerSolution.edges)
-        //clear_debug()
+        input_state.interactedWithGame = true
         let edge& = level.playerSolution.edges[input_state.edgeCandidate]
         input_state.dragHull <- build_hull(mouse.pos, edge, input_state.hullBaseIdx)
         input_state.hullDir = cross2d(edge.p2 - edge.p1, mouse.pos - edge.p1) > 0.0 ? 1.0 : -1.0
-        fill_intersected_edges(input_state, level)
-        fill_about_to_delete_edges(input_state, level)
         fill_inner_points(input_state, level)
         fill_phantom_hull(input_state, level)
         if !mouse.lmb_isDown
@@ -74,17 +72,16 @@ def handle_input(mouse:MouseInput; var input_state:InputState; var level:Level)
                     let idx = (hullIdx - i + length(input_state.phantomHull)) % length(input_state.phantomHull)
                     push(hull, input_state.phantomHull[idx])
             else
-                for i in range(length(input_state.phantomHull))
-                    if i != hullIdx && i != (hullIdx + 1) % length(input_state.phantomHull)
-                        push(hull, input_state.phantomHull[i])
-            //dd_polygon(input_state.phantomHull, 0x888888)
-            //dd_polygon(hull, 0xffffff)
+                let hullIdx2 = (hullIdx + 1) % length(input_state.phantomHull)
+                for i in range(1, length(input_state.phantomHull) - 1)
+                    let idx = (i + hullIdx + 1)  % length(input_state.phantomHull)
+                    push(hull, input_state.phantomHull[idx])
             solution_insert_into_edge(level.playerSolution, eidx, hull)
 
 def find_edge_in_hull_index(hull:array<float3>; p1, p2:float3)
     for e, idx in hull, iter_range(hull)
         let idx2 = (idx + 1) % length(hull)
-        if hull[idx] == p1 && hull[idx2] == p2
+        if hull[idx] == p1 && hull[idx2] == p2 || hull[idx] == p2 && hull[idx2] == p1
             return idx
     return -1
 
@@ -127,19 +124,6 @@ def add_parabolized_edge(var result:array<float3>; head, base, origin:float3; in
         push(result, base)
 
 
-def fill_intersected_edges(var input_state:InputState; level:Level)
-    let hull& = input_state.dragHull
-    for k in range(1, length(hull))
-        for edge, idx in level.playerSolution.edges, iter_range(level.playerSolution.edges)
-            if test_segment_intersection(hull[k], hull[k-1], edge.p1, edge.p2) > 0
-                if find_index(input_state.intersectedEdges, idx) == -1
-                    push(input_state.intersectedEdges, idx)
-
-
-def fill_about_to_delete_edges(var input_state:InputState; level:Level)
-    return
-
-
 def fill_inner_points(var input_state:InputState; level:Level)
     if length(input_state.dragHull) <= 3
         add_inner_points(input_state.innerPoints, input_state.dragHull, level.cities, input_state.hullDir)
@@ -154,8 +138,6 @@ def fill_inner_points(var input_state:InputState; level:Level)
             if idx >= upToIdx
                 push(subHull2, input_state.dragHull[idx])
         push(subHull2, input_state.dragHull[0])
-        //dd_polygon(subHull1)
-        //dd_polygon(subHull2)
         add_inner_points(input_state.innerPoints, subHull1, level.cities, input_state.hullDir)
         add_inner_points(input_state.innerPoints, subHull2, level.cities, input_state.hullDir)
     if find_index(input_state.innerPoints, input_state.dragHull[input_state.hullBaseIdx]) == -1
@@ -167,11 +149,8 @@ def add_inner_points(var result:array<float3>; hull:array<float3>; points:array<
     for p in points
         if test_point_in_polygon(p, hull, dir) > .0
             push(result, p)
-            //dd_circle_y(p)
 
 def fill_phantom_hull(var input_state:InputState; level:Level)
     var hull <- convex_hull(input_state.innerPoints)
-    //dd_label("inner len: {length(input_state.innerPoints)} hull len:{length(hull)}", float3(20, 0, 40))
-    //debug("inner len: {length(input_state.innerPoints)} hull len:{length(hull)}")
     input_state.phantomHull <- hull
     return

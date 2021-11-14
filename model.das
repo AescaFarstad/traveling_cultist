@@ -27,6 +27,11 @@ struct Level
     cities: array<float3>
     seed: int4
     playerSolution:Solution
+    aiSolution:array<float3>
+    knownLength:float
+    id:int
+    startingSeed:int4
+
 
 struct MouseInput
     lmb_isDown:bool
@@ -44,3 +49,15 @@ struct InputState
     hullBaseIdx:int
     hullDir:float
     phantomHull:array<float3>
+    interactedWithGame:bool
+    interactedWithUI:bool
+    showHelp:bool
+
+struct LevelSetting
+    seed:int4
+    knownLength:float
+    density:float
+    p_factor:int
+    minDst:float
+    id:int
+    timeLimit:int
