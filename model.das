@@ -1,17 +1,18 @@
 require math
+require math_2d
 
 struct Edge
-    p1:float3
-    p2: float3
-    center:float3
+    p1:float2
+    p2: float2
+    center:float2
     length:float
 
-def create_edge(from, to:float3): Edge
+def create_edge(from, to:float2): Edge
     var e:Edge
     set_edge(e, from, to)
     return <- e
 
-def set_edge(var edge; from, to:float3)
+def set_edge(var edge; from, to:float2)
     edge.p1 = from
     edge.p2 = to
     edge.center = (from + to) * 0.5
@@ -22,33 +23,33 @@ struct Solution
     length:float
 
 struct Level
-    size:float3
-    center:float3
-    cities: array<float3>
+    size:float2
+    center:float2
+    cities: array<float2>
     seed: int4
     playerSolution:Solution
-    aiSolution:array<float3>
+    aiSolution:array<float2>
     knownLength:float
     id:int
     startingSeed:int4
 
-
 struct MouseInput
     lmb_isDown:bool
     lmb_wasDown:bool
-    pos: float3
+    pos: float2
 
 struct InputState
-    deleteCandidate:float3
+    deleteCandidate:float2
     hasDeleteCandidate:bool
     edgeCandidate:int
-    dragHull:array<float3>
+    dragHull:array<float2>
     intersectedEdges:array<int>
     aboutToDeleteEdges:array<int>
-    innerPoints:array<float3>
+    innerPoints:array<float2>
     hullBaseIdx:int
     hullDir:float
-    phantomHull:array<float3>
+    phantomHull:array<float2>
+    expectedDelta:float
     interactedWithGame:bool
     interactedWithUI:bool
     showHelp:bool

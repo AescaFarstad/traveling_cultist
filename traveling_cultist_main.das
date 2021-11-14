@@ -3,14 +3,14 @@ require data_source
 require level
 require render
 require interaction
-require debug_draw
 require math_2d
 require solver_combo
 require ui_comps
 require ui
 require ui_keys
-options debugger            // uncomment for debug in VS Code
-require daslib/debug        // uncomment for debug in VS Code
+//require debug_draw
+//options debugger            // uncomment for debug in VS Code
+//require daslib/debug        // uncomment for debug in VS Code
 
 let padding = float4(100, 80, 40, 80) //top, right, bottom, left
 
@@ -24,8 +24,8 @@ var
 [export]
 def initialize
     set_window_title("Traveling cultist")
-    level.size = float3(float(get_screen_width()) - padding.w - padding.y, 0.0, float(get_screen_height()) - padding.x - padding.z)
-    level.center = float3(padding.w + level.size.x * 0.5, 0.0, padding.x + level.size.z * 0.5)
+    level.size = float2(float(get_screen_width()) - padding.w - padding.y, float(get_screen_height()) - padding.x - padding.z)
+    level.center = float2(padding.w + level.size.x * 0.5, padding.x + level.size.y * 0.5)
     load_setting(level, levels[0], BAN_RECT)
     set_antialiasing(16)
     populate_ui(buttons)
@@ -54,7 +54,7 @@ def act(dt: float)
 def draw
     if !input_state.showHelp
         render_level(level)
-        render_interaction(input_state, level)
+        render_interaction(mouse, input_state, level)
         render_ui(buttons)
         render_debug()
         clear_debug()

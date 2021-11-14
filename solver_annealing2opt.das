@@ -2,9 +2,7 @@ require math
 require random
 require solver_util
 
-require debug_draw
-
-def anneal(var list:array<float3>; var seed:int4&; start_temperature, end_temperature, cooling:float; iters_per_cycle:int = 100)
+def anneal(var list:array<float2>; var seed:int4&; start_temperature, end_temperature, cooling:float; iters_per_cycle:int = 100)
     var temperature = start_temperature
     let len = length(list)
     while temperature > end_temperature

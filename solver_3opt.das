@@ -1,6 +1,5 @@
 require math
 require solver_util
-require debug_draw
 
 /* variables meaning:
 N points starting with 'first' and ending with 'last' will be
@@ -9,7 +8,7 @@ and inserted into another place - between k and k2
 prev -> point -> ... -> last -> next => k -> k2
 */
 
-def single_3opt_pass(var list:array<float3>; limit_span:int = 20)
+def single_3opt_pass(var list:array<float2>; limit_span:int = 20)
     let len = length(list)
     var hasChange = false
     var limit = min(limit_span, len / 2)
@@ -58,7 +57,7 @@ def single_3opt_pass(var list:array<float3>; limit_span:int = 20)
                     break
         if bestValue < .0
             hasChange = true
-            var newList:array<float3>
+            var newList:array<float2>
             reserve(newList, len)
             for m in range(len - bestN)
                 let idx = (first + bestN + m) % len

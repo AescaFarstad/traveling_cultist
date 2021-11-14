@@ -38,13 +38,14 @@ def interact_with_ui(mouse:MouseInput; var input_state:InputState; var buttons:a
     input_state.interactedWithUI = false
     for button in buttons
         button.clicked = false
-        if hit_test(mouse.pos.xz, button)
+        if hit_test(mouse.pos, button)
             button.hovered = true
             if !mouse.lmb_wasDown && mouse.lmb_isDown
                 button.clicked = true
                 input_state.interactedWithUI = true
         else
             button.hovered = false
+
 
 def process_buttons(var input_state:InputState; var level:Level; var buttons:array<Button>)
     for button in buttons
@@ -67,6 +68,7 @@ def proccess_action(key:int; var input_state:InputState; var level:Level; var bu
         on_level_btn_click(5, input_state, level, buttons)
     if key == UI_KEY_HOW_TO
         input_state.showHelp = true
+
 
 def on_level_btn_click(idx:int; var input_state:InputState; var level:Level; var buttons:array<Button>)
     input_state.hasDeleteCandidate = false

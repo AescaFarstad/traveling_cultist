@@ -1,9 +1,7 @@
 require math
 require solver_util
 
-require debug_draw
-
-def single_2opt_pass(var list:array<float3>)
+def single_2opt_pass(var list:array<float2>)
     let len = length(list)
     var hasChange = false
     for p1 in range(len)

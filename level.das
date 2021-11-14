@@ -1,6 +1,5 @@
 require math
 require daslib/random
-require debug_draw
 require math_2d
 require dasbox
 require solver_util
@@ -18,10 +17,9 @@ def load_setting(var level:Level; setting:LevelSetting; ban_rect:float4)
     if setting.seed != int4()
         level.seed = setting.seed
     else
-        debug("asferfresd")
         randomize_seed(level.seed)
     level.startingSeed = level.seed
-    let numCities = int(level.size.x * level.size.z * setting.density)
+    let numCities = int(level.size.x * level.size.y * setting.density)
     add_cities(level, numCities, setting.minDst, setting.p_factor, ban_rect)
     level.playerSolution <- solution_from_list(convex_hull(level.cities))
     level.id = setting.id
@@ -38,12 +36,12 @@ def add_cities(var level:Level; num: int; min_dst:float; p_factor:int; ban_rect:
     let bufferSq = min_dst * min_dst
     var itersLeft = 1000000
     while left >= 0 && itersLeft-- > 0
-        var bestLoc: float3
+        var bestLoc: float2
         var bestDstSq = -1.0
         for it in range(p_factor)
-            let loc = level.center - level.size * 0.5 + float3( random_float(level.seed) * level.size.x, .0,
-                                                                random_float(level.seed) * level.size.z)
-            if loc.x > ban_rect.x && loc.z > ban_rect.y && loc.x < ban_rect.z && loc.z < ban_rect.w
+            let loc = level.center - level.size * 0.5 + float2( random_float(level.seed) * level.size.x,
+                                                                random_float(level.seed) * level.size.y)
+            if loc.x > ban_rect.x && loc.y > ban_rect.y && loc.x < ban_rect.z && loc.y < ban_rect.w
                 continue
             var minDstSq = FLT_MAX
             for p in level.cities
@@ -55,7 +53,7 @@ def add_cities(var level:Level; num: int; min_dst:float; p_factor:int; ban_rect:
             level.cities |> push(bestLoc)
             left--
 
-def solution_from_list(list:array<float3>): Solution
+def solution_from_list(list:array<float2>): Solution
     if length(list) < 2
         return <- [[Solution]]
     var solution:Solution
@@ -66,7 +64,7 @@ def solution_from_list(list:array<float3>): Solution
         push(solution.edges, edge)
     return <- solution
 
-def solution_delete_point(var solution:Solution; target:float3)
+def solution_delete_point(var solution:Solution; target:float2)
     var edgeFromIdx = -1
     var edgeToIdx = -1
     for e, idx in solution.edges, iter_range(solution.edges)
@@ -75,7 +73,6 @@ def solution_delete_point(var solution:Solution; target:float3)
         if e.p2 == target
             edgeFromIdx = idx
     if edgeFromIdx == -1 || edgeToIdx == -1
-        //debug("ERROR, target point does not exist in the solution, can't delete")
         return false
     var edgeFrom & = solution.edges[edgeFromIdx]
     var edgeTo & = solution.edges[edgeToIdx]
@@ -87,19 +84,19 @@ def solution_delete_point(var solution:Solution; target:float3)
     erase(solution.edges, edgeToIdx)
     return true
 
-def solution_contains_point(solution:Solution; p:float3)
+def solution_contains_point(solution:Solution; p:float2)
     for e in solution.edges
         if e.p1 == p
             return true
     return false
 
-def find_edge_index(solution:Solution; p1, p2:float3)
+def find_edge_index(solution:Solution; p1, p2:float2)
     for e, idx in solution.edges, iter_range(solution.edges)
         if e.p1 == p1 && e.p2 == p2
             return idx
     return -1
 
-def solution_insert_into_edge(var solution:Solution; edge_idx:int; hull:array<float3>)
+def solution_insert_into_edge(var solution:Solution; edge_idx:int; hull:array<float2>)
     var trackEdgeIdx = edge_idx
     var prev = solution.edges[edge_idx].p1
     for p in hull
